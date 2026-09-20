@@ -35,14 +35,37 @@ app.get('/assignments', async (req, res) => {
     }catch(err){
         console.log(err.message);
         res.status(500).json({
-            errorMessage: 'Server is Down'
+            errorMessage: 'Server is down'
         });
+    }
+});
+
+app.patch('/assignments/:id', async(req, res) => {
+    try{
+        const { id } = req.params;
+        const result = await pool.query(
+            `UPDATE assignments
+            SET submitted = true
+            WHERE id = $1
+            RETURNING *;`,
+            [id]
+        );
+        if(result.rows.length === 0){
+            return res.status(404).json({
+                message: 'Assignments Not Found'
+            });
+        };
+        res.status(200).json(result.rows[0]);
+    }catch(err){
+    console.log(err.message);
+    res.status(502).json({
+        errorMessage: 'Server is closed'
+    });
     }
 });
 
 
 
-
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log('Server running on port 3000');
 })
